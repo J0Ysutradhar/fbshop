@@ -14,7 +14,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 # Initialize OpenAI client (new syntax)
 client = OpenAI(api_key=OPENAI_API_KEY)
 @app.route('/')
-def home()
+def home():
     return 'Im live joy v2'
 @app.route("/webhook", methods=["GET", "POST"])
 def webhook():
