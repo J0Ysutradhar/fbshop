@@ -2,19 +2,20 @@ from flask import Flask, request
 import requests
 import os
 from openai import OpenAI
+from dotenv import load_dotenv
 
-
-
+load_dotenv()
 
 app = Flask(__name__)
-VERIFY_TOKEN = 'fbshop'
-PAGE_ACCESS_TOKEN = 'EAAYjAWyeiBoBO80x3d7XZC1ISxqZCrIJ92ONGSWipdZAZBhdrdz3c2u2ZClsGhSqwT4ZB1OjUdyOZAV0N7WIxZBLNMHVSIy3WCxmw98ZCwvHJRDPzg5hAfzWaWXUB5oZBaZA1cUgYZB54tw7KkpEBgPqgvu8ZA7wwZBqRyoonkALjeKaXpUMLjyxmZA6ANZBuHCiySWpGN5TJSSDsZCeFqgZDZD'
-OPENAI_API_KEY = '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'
+VERIFY_TOKEN = os.getenv("VERIFY_TOKEN")
+PAGE_ACCESS_TOKEN = os.getenv("PAGE_ACCESS_TOKEN")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
 # Initialize OpenAI client (new syntax)
 client = OpenAI(api_key=OPENAI_API_KEY)
 @app.route('/')
-def home():
-    return 'Joy Im live'
+def home()
+    return 'Im live joy v2'
 @app.route("/webhook", methods=["GET", "POST"])
 def webhook():
     if request.method == "GET":
@@ -57,4 +58,4 @@ def send_fb_message(recipient_id, message_text):
     print("Facebook response:", response.status_code, response.text)
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0',debug=True)
+    app.run(host='0.0.0.0', debug=True)
