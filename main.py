@@ -54,4 +54,4 @@ def send_fb_message(recipient_id, message):
     requests.post(url, json=payload, headers=headers)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0, debug=True)
+    app.run(host='0.0.0.0', debug=True)
