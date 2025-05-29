@@ -12,7 +12,9 @@ PAGE_ACCESS_TOKEN = 'EAAYjAWyeiBoBO80x3d7XZC1ISxqZCrIJ92ONGSWipdZAZBhdrdz3c2u2ZC
 OPENAI_API_KEY = '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'
 # Initialize OpenAI client (new syntax)
 client = OpenAI(api_key=OPENAI_API_KEY)
-
+@app.route('/')
+def home():
+    return 'Joy Im live'
 @app.route("/webhook", methods=["GET", "POST"])
 def webhook():
     if request.method == "GET":
@@ -55,4 +57,4 @@ def send_fb_message(recipient_id, message_text):
     print("Facebook response:", response.status_code, response.text)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0',debug=True)
