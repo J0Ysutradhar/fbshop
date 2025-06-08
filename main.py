@@ -12,7 +12,7 @@ PAGE_ACCESS_TOKEN = os.getenv("PAGE_ACCESS_TOKEN")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # Initialize OpenAI client (new syntax)
-client = OpenAI(api_key=OPENAI_API_KEY)
+client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=OPENAI_API_KEY)
 @app.route('/')
 def home():
     return 'Im live joy v2'
@@ -37,7 +37,7 @@ def webhook():
 def generate_ai_reply(message_text):
     try:
         completion = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="deepseek/deepseek-r1-0528:free",
             messages=[
                 {"role": "system", "content": "You are a friendly customer support assistant for an online shop."},
                 {"role": "user", "content": message_text}
@@ -46,7 +46,7 @@ def generate_ai_reply(message_text):
         return completion.choices[0].message.content.strip()
     except Exception as e:
         print("OpenAI error:", e)
-        return "Sorry, something went wrong."
+        return "Sorry, something went wrong v0.2."
 
 def send_fb_message(recipient_id, message_text):
     payload = {
