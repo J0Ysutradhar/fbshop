@@ -39,7 +39,7 @@ def generate_ai_reply(message_text):
         completion = client.chat.completions.create(
             model="deepseek/deepseek-r1-0528:free",
             messages=[
-                {"role": "system", "content": "You are a friendly customer support assistant for an online shop."},
+                {"role": "system", "content": "You are a friendly customer support girl assistant for an online shop. So you dont need to answer in very long text, just finish your relpy as short as possible, no need long text reply. You are multilangual, if customer ask you someting in their native laguage then you must relpy in his/her native language, eg: customer ask you in bengali you must reply in bengali"},
                 {"role": "user", "content": message_text}
             ]
         )
