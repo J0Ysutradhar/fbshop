@@ -13,9 +13,11 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # Initialize OpenAI client (new syntax)
 client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=OPENAI_API_KEY)
+
 @app.route('/')
 def home():
-    return 'Im live joy v0.2'
+    return 'I am live, Joy v0.3!'
+
 @app.route("/webhook", methods=["GET", "POST"])
 def webhook():
     if request.method == "GET":
@@ -26,12 +28,22 @@ def webhook():
     if request.method == "POST":
         data = request.get_json()
         for entry in data.get("entry", []):
-            for messaging_event in entry.get("messaging", []):
-                sender_id = messaging_event.get("sender", {}).get("id")
-                message = messaging_event.get("message", {}).get("text")
+            for event in entry.get("messaging", []):
+                sender_id = event.get("sender", {}).get("id")
+                message = event.get("message", {}).get("text")
                 if sender_id and message:
                     reply = generate_ai_reply(message)
                     send_fb_message(sender_id, reply)
+
+            for change in entry.get("changes", []):
+                if change.get("field") == "feed":
+                    value = change.get("value", {})
+                    if value.get("item") == "comment" and value.get("verb") == "add":
+                        comment_id = value.get("comment_id")
+                        comment_message = value.get("message")
+                        if comment_id and comment_message:
+                            reply = generate_ai_reply(comment_message)
+                            reply_to_comment(comment_id, reply)
         return "OK", 200
 
 def generate_ai_reply(message_text):
@@ -39,14 +51,14 @@ def generate_ai_reply(message_text):
         completion = client.chat.completions.create(
             model="deepseek/deepseek-r1-0528:free",
             messages=[
-                {"role": "system", "content": "You are a friendly customer support girl assistant for an online shop. So you dont need to answer in very long text, just finish your relpy as short as possible, no need long text reply. You are multilangual, if customer ask you someting in their native laguage then you must relpy in his/her native language, eg: customer ask you in bengali you must reply in bengali"},
+                {"role": "system", "content": "You are a friendly customer support girl assistant for an online shop. So you don't need to answer in very long text, just finish your reply as short as possible. You are multilingual, so reply in the customer's language."},
                 {"role": "user", "content": message_text}
             ]
         )
         return completion.choices[0].message.content.strip()
     except Exception as e:
         print("OpenAI error:", e)
-        return "Sorry, something went wrong v0.2."
+        return "Sorry, something went wrong v0.3."
 
 def send_fb_message(recipient_id, message_text):
     payload = {
@@ -55,7 +67,18 @@ def send_fb_message(recipient_id, message_text):
     }
     url = f"https://graph.facebook.com/v19.0/me/messages?access_token={PAGE_ACCESS_TOKEN}"
     response = requests.post(url, json=payload)
-    print("Facebook response:", response.status_code, response.text)
+    print("Messenger response:", response.status_code, response.text)
+
+def reply_to_comment(comment_id, message_text):
+    url = f"https://graph.facebook.com/v19.0/{comment_id}/comments"
+    params = {
+        "access_token": PAGE_ACCESS_TOKEN
+    }
+    data = {
+        "message": message_text
+    }
+    response = requests.post(url, params=params, data=data)
+    print("Comment reply response:", response.status_code, response.text)
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)
