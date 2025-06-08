@@ -15,7 +15,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=OPENAI_API_KEY)
 @app.route('/')
 def home():
-    return 'Im live joy v2'
+    return 'Im live joy v0.2'
 @app.route("/webhook", methods=["GET", "POST"])
 def webhook():
     if request.method == "GET":
