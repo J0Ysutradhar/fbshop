@@ -1,0 +1,360 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "path": "realtime",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -540,
+        40
+      ],
+      "id": "54539ed6-a98d-4c32-ae17-0703c0081d74",
+      "name": "Webhook",
+      "webhookId": "031cca71-3c0b-42c3-8979-36227d266e12"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "fa188008-0971-47a4-8f0c-77e09c951524",
+              "leftValue": "={{ $json.query['hub.mode'] }}",
+              "rightValue": "subscribe",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "1200381d-0d9e-4c7b-bd5b-5ae43b42bf44",
+              "leftValue": "={{ $json.query['hub.verify_token'] }}",
+              "rightValue": "123",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -280,
+        20
+      ],
+      "id": "6739e922-2183-4919-b346-340a179e149e",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.query['hub.challenge'] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "efcf4273-c141-4d8c-b7ce-54f332570ba3",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "acb13e67-12ca-4e73-b24c-615ad73dbd83",
+              "leftValue": "={{ $json.body.entry[0].changes[0].value.comment_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "9fc494e6-922c-4f32-a6d1-531fad4b3207",
+              "leftValue": "={{ $json.body.entry[0].changes[0].value.from.id }}",
+              "rightValue": "107071155511488",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -280,
+        240
+      ],
+      "id": "b2151dd5-fa14-432c-891f-3dad8c616f5d",
+      "name": "Vaiding Comment"
+    },
+    {
+      "parameters": {
+        "graphApiVersion": "v22.0",
+        "node": "={{ $json.post_id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        220,
+        220
+      ],
+      "id": "573cd1da-1ac4-42c3-86a9-921c8a6fb2db",
+      "name": "FB Post Informations"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "df277277-5f61-4b62-a269-ecd80f4637e3",
+              "name": "user_id",
+              "value": "={{ $json.body.entry[0].changes[0].value.from.id }}",
+              "type": "string"
+            },
+            {
+              "id": "79b82cdd-494a-4590-99b5-b3f2a5704512",
+              "name": "post_id",
+              "value": "={{ $json.body.entry[0].changes[0].value.post_id }}",
+              "type": "string"
+            },
+            {
+              "id": "39c8866b-e02b-4803-a5c0-e41bcdaa43b7",
+              "name": "comment_id",
+              "value": "={{ $json.body.entry[0].changes[0].value.comment_id }}",
+              "type": "string"
+            },
+            {
+              "id": "37f61980-1365-4454-843a-4084624369f0",
+              "name": "comment",
+              "value": "={{ $json.body.entry[0].changes[0].value.message }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        220
+      ],
+      "id": "bcc22310-320f-46cf-bfa9-10cb1cf22d2d",
+      "name": "Comment Details Extraction"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=post_context={{ $json.message }}\nuser_comment={{ $('Comment Details Extraction').item.json.comment }}",
+        "options": {
+          "systemMessage": "You are a human admin of a facebook page, your job is replying in user comments (Based on post and user comment) in human toon. So nobody can understand that are an Ai. I will provide you Facebook Post context and user comment. Must remember that your output reply should be finished in 1/3 sentences not make it too lengthy, try to finsh in short dont add any extra informations. \ni will provide you 2 infomartion:\npost_context, user_comment "
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        460,
+        220
+      ],
+      "id": "42136d58-c8dd-4f53-8067-d058a67d5b8b",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        440,
+        440
+      ],
+      "id": "cf081611-ed3c-44b4-b8e9-837447e59d5b",
+      "name": "Ai"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Comment Details Extraction').item.json.user_id }}",
+        "contextWindowLength": 2
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        580,
+        440
+      ],
+      "id": "d4b92ff2-c556-42b4-bde0-434b150f3451",
+      "name": "Memory"
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v22.0",
+        "node": "={{ $('Comment Details Extraction').item.json.comment_id }}",
+        "edge": "comments",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "message",
+                "value": "=@[{{ $('Comment Details Extraction').item.json.user_id }}] {{ $json.output }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        840,
+        220
+      ],
+      "id": "eae72d06-b699-4a94-aed3-956e2c770c2d",
+      "name": "Replying on comment"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Vaiding Comment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vaiding Comment": {
+      "main": [
+        [
+          {
+            "node": "Comment Details Extraction",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FB Post Informations": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Comment Details Extraction": {
+      "main": [
+        [
+          {
+            "node": "FB Post Informations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Replying on comment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ai": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "caae59d5-59e9-41f3-83b4-6d87fc7c721e",
+  "meta": {
+    "instanceId": "1d001a81a8d5791a1d495d6577abb202ebb16b42d53ce3d6f7a4aa938b4b409b"
+  },
+  "id": "JCe3dRGejr5VDoS5",
+  "tags": []
+}
